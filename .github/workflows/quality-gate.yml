@@ -1,0 +1,41 @@
+name: Quality Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-static-game:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify required files
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in index.html style.css script.js correct.mp3 wrong.mp3; do
+            test -f "$file"
+          done
+
+      - name: Verify local asset references
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'style.css' index.html
+          grep -q 'script.js' index.html
+          grep -q 'correct.mp3' script.js
+          grep -q 'wrong.mp3' script.js
+
+      - name: Validate HTML structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '<!DOCTYPE html>' index.html
+          grep -q '</html>' index.html
